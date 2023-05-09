@@ -1,9 +1,7 @@
 #include "bits/stdc++.h"
-
-#define DEBUG
-
-#define INPUT_FILE "./input/input9.txt"
-#define OUTPUT_FILE "./output/output9.txt"
+//#define DEBUG
+#define INPUT_FILE "./input/input0.txt"
+#define OUTPUT_FILE "./output/output0.txt"
 
 constexpr int MAX_LENGTH = 1000;
 
@@ -37,6 +35,19 @@ auto compare = [](const Node *a, const Node *b) {
 
 std::multiset<Node *, decltype(compare)> edge_set(compare);
 
+std::tuple<std::pair<int, int>, std::pair<int, int>, std::pair<int, int>> set_L(int i, int j, Direction s) {
+    switch (s) {
+        case TOP_LEFT:
+            return std::make_tuple(std::make_pair(i, j), std::make_pair(i + 1, j), std::make_pair(i, j + 1));
+        case TOP_RIGHT:
+            return std::make_tuple(std::make_pair(i, j + 1), std::make_pair(i, j), std::make_pair(i + 1, j + 1));
+        case BOTTOM_LEFT:
+            return std::make_tuple(std::make_pair(i + 1, j), std::make_pair(i + 1, j + 1), std::make_pair(i, j));
+        case BOTTOM_RIGHT:
+            return std::make_tuple(std::make_pair(i + 1, j + 1), std::make_pair(i, j + 1), std::make_pair(i + 1, j));
+    }
+}
+
 int main() {
     std::ifstream in;
     std::ofstream out;
@@ -63,72 +74,32 @@ int main() {
         edge_set.erase(edge_set.begin());
         for (int i = 0; i < N - 1; i++) {
             for (int j = 0; j < N - 1; j++) {
-                if (top->matrix[i][j] || top->matrix[i + 1][j] || top->matrix[i][j + 1]) {
-                    auto new_node = new Node;
-                    memcpy(new_node->matrix, top->matrix, sizeof(top->matrix));
-                    new_node->matrix[i][j] = !new_node->matrix[i][j];
-                    new_node->matrix[i + 1][j] = !new_node->matrix[i + 1][j];
-                    new_node->matrix[i][j + 1] = !new_node->matrix[i][j + 1];
-                    new_node->steps = top->steps;
-                    new_node->steps.emplace_back(i, j, TOP_LEFT);
-                    new_node->g = top->g + 3;
-                    new_node->h = h_func(new_node);
-                    new_node->f = new_node->g + new_node->h;
-                    edge_set.insert(new_node);
-                    if (new_node->h == 0) {
-                        result_node = new_node;
-                        goto A;
-                    }
-                }
-                if (top->matrix[i][j] || top->matrix[i + 1][j + 1] || top->matrix[i][j + 1]) {
-                    auto new_node = new Node;
-                    memcpy(new_node->matrix, top->matrix, sizeof(top->matrix));
-                    new_node->matrix[i][j] = !new_node->matrix[i][j];
-                    new_node->matrix[i + 1][j + 1] = !new_node->matrix[i + 1][j + 1];
-                    new_node->matrix[i][j + 1] = !new_node->matrix[i][j + 1];
-                    new_node->steps = top->steps;
-                    new_node->steps.emplace_back(i, j + 1, TOP_RIGHT);
-                    new_node->g = top->g + 3;
-                    new_node->h = h_func(new_node);
-                    new_node->f = new_node->g + new_node->h;
-                    edge_set.insert(new_node);
-                    if (new_node->h == 0) {
-                        result_node = new_node;
-                        goto A;
-                    }
-                }
-                if (top->matrix[i][j] || top->matrix[i + 1][j] || top->matrix[i + 1][j + 1]) {
-                    auto new_node = new Node;
-                    memcpy(new_node->matrix, top->matrix, sizeof(top->matrix));
-                    new_node->matrix[i][j] = !new_node->matrix[i][j];
-                    new_node->matrix[i + 1][j] = !new_node->matrix[i + 1][j];
-                    new_node->matrix[i + 1][j + 1] = !new_node->matrix[i + 1][j + 1];
-                    new_node->steps = top->steps;
-                    new_node->steps.emplace_back(i + 1, j, BOTTOM_LEFT);
-                    new_node->g = top->g + 3;
-                    new_node->h = h_func(new_node);
-                    new_node->f = new_node->g + new_node->h;
-                    edge_set.insert(new_node);
-                    if (new_node->h == 0) {
-                        result_node = new_node;
-                        goto A;
-                    }
-                }
-                if (top->matrix[i + 1][j] || top->matrix[i][j + 1] || top->matrix[i + 1][j + 1]) {
-                    auto new_node = new Node;
-                    memcpy(new_node->matrix, top->matrix, sizeof(top->matrix));
-                    new_node->matrix[i + 1][j] = !new_node->matrix[i + 1][j];
-                    new_node->matrix[i][j + 1] = !new_node->matrix[i][j + 1];
-                    new_node->matrix[i + 1][j + 1] = !new_node->matrix[i + 1][j + 1];
-                    new_node->steps = top->steps;
-                    new_node->steps.emplace_back(i + 1, j + 1, BOTTOM_RIGHT);
-                    new_node->g = top->g + 3;
-                    new_node->h = h_func(new_node);
-                    new_node->f = new_node->g + new_node->h;
-                    edge_set.insert(new_node);
-                    if (new_node->h == 0) {
-                        result_node = new_node;
-                        goto A;
+                for (int k = 1; k <= 4; k++) {
+                    auto location = set_L(i, j, Direction(k));
+                    if (top->matrix[std::get<0>(location).first][std::get<0>(location).second] ||
+                        top->matrix[std::get<1>(location).first][std::get<1>(location).second] ||
+                        top->matrix[std::get<2>(location).first][std::get<2>(location).second]) {
+                        auto new_node = new Node;
+                        memcpy(new_node->matrix, top->matrix, sizeof(top->matrix));
+                        new_node->matrix[std::get<0>(location).first][std::get<0>(
+                                location).second] = !new_node->matrix[std::get<0>(location).first][std::get<0>(
+                                location).second];
+                        new_node->matrix[std::get<1>(location).first][std::get<1>(
+                                location).second] = !new_node->matrix[std::get<1>(location).first][std::get<1>(
+                                location).second];
+                        new_node->matrix[std::get<2>(location).first][std::get<2>(
+                                location).second] = !new_node->matrix[std::get<2>(location).first][std::get<2>(
+                                location).second];
+                        new_node->steps = top->steps;
+                        new_node->steps.emplace_back(std::get<0>(location).first, std::get<0>(location).second, Direction(k));
+                        new_node->g = top->g + 3;
+                        new_node->h = h_func(new_node);
+                        new_node->f = new_node->g + new_node->h;
+                        edge_set.insert(new_node);
+                        if (new_node->h == 0) {
+                            result_node = new_node;
+                            goto A;
+                        }
                     }
                 }
                 if (edge_set.size() > MAX_LENGTH) {
@@ -139,7 +110,6 @@ int main() {
                 }
             }
         }
-
     }
     A:
     std::cout << result_node->steps.size() << std::endl;
@@ -186,7 +156,6 @@ int main() {
             std::cout << base_node->matrix[i][j] << " \n"[j == N - 1];
     std::cin.rdbuf(cinbackup);
     in.close();
-
 #endif
     return 0;
 }
