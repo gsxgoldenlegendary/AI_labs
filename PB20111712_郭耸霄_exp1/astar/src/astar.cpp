@@ -1,15 +1,16 @@
 #include "bits/stdc++.h"
 //#define DEBUG
-#define INPUT_FILE "./input/input0.txt"
-#define OUTPUT_FILE "./output/output0.txt"
+#define INPUT_FILE "./input/input9.txt"
+#define OUTPUT_FILE "./output/output9.txt"
 
 constexpr int MAX_LENGTH = 1000;
+constexpr int SHRINK_LENGTH = 100;
 
 enum Direction {
-    TOP_LEFT = 4,
-    TOP_RIGHT = 3,
     BOTTOM_LEFT = 1,
-    BOTTOM_RIGHT = 2
+    BOTTOM_RIGHT = 2,
+    TOP_RIGHT = 3,
+    TOP_LEFT = 4,
 };
 
 struct Node {
@@ -20,7 +21,7 @@ struct Node {
 
 int N;
 
-int h_func(const Node *n) {
+inline int h_func(const Node *n) {
     int cnt = 0;
     for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++)
@@ -103,7 +104,7 @@ int main() {
                     }
                 }
                 if (edge_set.size() > MAX_LENGTH) {
-                    for (int k = 0; k < 10; k++) {
+                    for (int k = 0; k < SHRINK_LENGTH; k++) {
                         delete *--edge_set.end();
                         edge_set.erase(--edge_set.end());
                     }
