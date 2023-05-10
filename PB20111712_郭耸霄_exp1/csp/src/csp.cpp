@@ -1,9 +1,20 @@
 #include "bits/stdc++.h"
 
-#define INPUT_FILE "./input/input1.txt"
-#define OUTPUT_FILE "./output/output1.txt"
+#define INPUT_FILE "./input/input9.txt"
+#define OUTPUT_FILE "./output/output9.txt"
 
 #define RANDOM
+//most optimal outputs
+//input0 11/21/35
+//input1 31/60/332
+//input2 19/33/350
+//input3 53/114/748
+//input4 37/69/632
+//input5 288/576/23705
+//input6 513/1008/49741
+//input7 185/378/11673
+//input8 1094/2160/154963
+//input9 378/720/70560
 #define DEBUG
 
 int main() {
@@ -126,7 +137,8 @@ int main() {
     in.close();
     out.close();
 #ifdef DEBUG
-    std::cout << satisfy << std::endl << total << std::endl;
+    int max_satisfy = D * S;
+    std::cout << satisfy << std::endl << max_satisfy << std::endl << total << std::endl;
 #endif
     return 0;
 }
