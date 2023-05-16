@@ -1,7 +1,9 @@
 #include "bits/stdc++.h"
 
-#define INPUT_FILE "./input/input0.txt"
-#define OUTPUT_FILE "./output/output0.txt"
+#define INPUT_FILE "./input/input7.txt"
+#define OUTPUT_FILE "./output/output7.txt"
+
+//#define DEBUG
 
 //#define RANDOM
 //most optimal outputs
@@ -16,18 +18,50 @@
 //input8 1094/2160/154963
 //input9 378/720/70560
 #define GREEDY
-//most optimal outputs
-//input0 /21/35
-//input1 /60/332
-//input2 /33/350
-//input3 /114/748
-//input4 /69/632
-//input5 /576/23705
-//input6 /1008/49741
-//input7 /378/11673
-//input8 /2160/154963
-//input9 /720/70560
-#define DEBUG
+//input0 20/21/35
+//input1 60/60/332
+//input2 32/33/350
+//input3 114/114/748
+//input4 67/69/632
+//input5 574/576/23705
+//input6 1006/1008/49741
+//input7 377/378/11673
+//input8 2159/2160/154963
+//input9 719/720/70560
+
+
+#ifdef GREEDY
+
+#define FOUND_PERSON \
+if (find_id != -1) {\
+    arrangement[i] = find_id;\
+    work_on_person[find_id]++;\
+    pre_id = find_id;\
+    min_work = min_on_duty;\
+    min_id = 0;\
+    for (int k = 0; k < N; k++) {\
+        if (work_on_person[k] < min_work) {\
+            min_work = work_on_person[k];\
+            min_id = k;\
+        }\
+    }\
+    continue;\
+}
+
+#define REQUEST (request[j * D * S + i])
+#define LESS_WORK (work_on_person[j] < find_work)
+#define NO_CONTINUE (j != pre_id)
+
+#define CHOOSE_PERSON(x)\
+find_id = -1;\
+find_work = min_on_duty;\
+for (int j = 0; j < N; j++) {\
+    if (x) {\
+        find_id = j;\
+        find_work = work_on_person[j];\
+    }\
+}
+#endif
 
 int main() {
     std::ifstream in;
@@ -55,10 +89,10 @@ int main() {
     int min_on_duty = D * S / N;
     int even_on_duty = min_on_duty * N;
     int extra_on_duty = D * S - even_on_duty;
+
 #ifdef RANDOM
     std::random_device rd;
     std::mt19937_64 e(rd());
-
     auto arrangement = new std::vector<int>;
     auto sequence = new std::vector<int>;
     for (int i = 0; i < min_on_duty; i++) {
@@ -137,189 +171,52 @@ int main() {
     delete sequence;
     delete table;
     delete personnel;
-#elifdef GREEDY
+#endif
+#ifdef GREEDY
     int work_on_person[N];
+    memset(work_on_person, 0, sizeof(work_on_person));
     int arrangement[D * S];
-    int work_remain = D * S;
+    memset(arrangement, -1, sizeof(arrangement));
     int min_work = -1;
-    int min_id = -1;
+    int min_id = 0;
     int pre_id = -1;
     int find_id = -1;
     int find_work = -1;
-    int temp_work = min_on_duty;
-    for (int i = 0; i < D * S; i++) {
-        find_id = -1;
-        find_work = temp_work;
-        //phase 1
-        for (int j = 0; j < N; j++) {
-            if (request[j * D * S + i] && work_on_person[j] < min_on_duty && i != pre_id) {
-                find_id = j;
-                find_work = work_on_person[j];
-            }
-        }
-        if (find_id != -1) {
-            arrangement[i] = find_id;
-            work_on_person[find_id]++;
-            work_remain--;
-            pre_id = find_id;
-            min_work = min_on_duty;
-            min_id = -1;
-            for (int k = 0; k < N; k++) {
-                if (work_on_person[k] < min_work) {
-                    min_work = work_on_person[k];
-                    min_id = k;
-                }
-            }
-            continue;
-        }
-        //phase 2
-        find_id = -1;
-        find_work = min_on_duty;
-        for (int j = 0; j < N; j++) {
-            if (work_on_person[j] < min_on_duty) {
-                find_id = j;
-                find_work = work_on_person[j];
-            }
-        }
-        if (find_id != -1) {
-            arrangement[i] = find_id;
-            work_on_person[find_id]++;
-            work_remain--;
-            pre_id = find_id;
-            min_work = min_on_duty;
-            min_id = -1;
-            for (int k = 0; k < N; k++) {
-                if (work_on_person[k] < min_work) {
-                    min_work = work_on_person[k];
-                    min_id = k;
-                }
-            }
-            continue;
-        }
-        //phase 3
-        find_id = -1;
-        find_work = min_on_duty;
-        for (int j = 0; j < N; j++) {
-            if (request[j * D * S + i] && j != pre_id) {
-                find_id = j;
-                find_work = work_on_person[j];
-            }
-        }
-
-        if (find_id != -1) {
-            arrangement[i] = find_id;
-            work_on_person[find_id]++;
-            work_remain--;
-            pre_id = find_id;
-            min_work = min_on_duty;
-            min_id = -1;
-            for (int k = 0; k < N; k++) {
-                if (work_on_person[k] < min_work) {
-                    min_work = work_on_person[k];
-                    min_id = k;
-                }
-            }
-            continue;
-        }
-        //phase 4
-        find_id = -1;
-        find_work = min_on_duty;
-        for (int j = 0; j < N; j++) {
-            if (j != pre_id) {
-                find_id = j;
-                find_work = work_on_person[j];
-            }
-        }
-        if (find_id != -1) {
-            arrangement[i] = find_id;
-            work_on_person[find_id]++;
-            work_remain--;
-            pre_id = find_id;
-            min_work = min_on_duty;
-            min_id = -1;
-            for (int k = 0; k < N; k++) {
-                if (work_on_person[k] < min_work) {
-                    min_work = work_on_person[k];
-                    min_id = k;
-                }
-            }
-            continue;
-        }
+    int i = 0;
+    for (i = 0; i < even_on_duty; i++) {
+        CHOOSE_PERSON(REQUEST && LESS_WORK && NO_CONTINUE)
+        FOUND_PERSON
+        CHOOSE_PERSON(LESS_WORK && NO_CONTINUE)
+        FOUND_PERSON
+        break;
     }
-    bool flag = false;
-    for (int i = 0; i < D * S; i++) {
-        if (!flag) {
-            arrangement[i] = min_id;
-            work_on_person[min_id]++;
-            pre_id = min_id;
-            flag = true;
+    for (; i < D * S; i++) {
+        if (i >= even_on_duty) {
+            CHOOSE_PERSON(REQUEST && NO_CONTINUE)
+            FOUND_PERSON
+            CHOOSE_PERSON(NO_CONTINUE)
+            FOUND_PERSON
         } else {
-            find_id = -1;
-            find_work = min_on_duty;
-            for (int j = 0; j < N; j++) {
-                if (work_on_person[j] < min_work && request[j * D * S + i] && j != pre_id) {
-                    find_id = j;
-                    find_work = work_on_person[j];
-                }
-            }
-            if (find_id != -1) {
-                arrangement[i] = find_id;
-                work_on_person[find_id]++;
-                pre_id = find_id;
-                flag = false;
-                continue;
-            }
-            find_id = -1;
-            find_work = min_on_duty;
-            for (int j = 0; j < N; j++) {
-                if (work_on_person[j] < min_work && j != pre_id) {
-                    find_id = j;
-                    find_work = work_on_person[j];
-                }
-            }
-            if (find_id != -1) {
-                arrangement[i] = find_id;
-                work_on_person[find_id]++;
-                pre_id = find_id;
-                flag = false;
-                continue;
-            }
-            find_id = -1;
-            find_work = min_on_duty;
-            for (int j = 0; j < N; j++) {
-                if (request[j * D * S + i] && j != pre_id) {
-                    find_id = j;
-                    find_work = work_on_person[j];
-                }
-            }
-            if (find_id != -1) {
-                arrangement[i] = find_id;
-                work_on_person[find_id]++;
-                pre_id = find_id;
-                flag = false;
-                continue;
-            }
-            find_id = -1;
-            find_work = min_on_duty;
-            for (int j = 0; j < N; j++) {
-                if (j != pre_id) {
-                    find_id = j;
-                    find_work = work_on_person[j];
-                }
-            }
-            if (find_id != -1) {
-                arrangement[i] = find_id;
-                work_on_person[find_id]++;
-                pre_id = find_id;
-                flag = false;
-                continue;
+            CHOOSE_PERSON(REQUEST && LESS_WORK && NO_CONTINUE)
+            FOUND_PERSON
+            CHOOSE_PERSON(LESS_WORK && NO_CONTINUE)
+            FOUND_PERSON
+            if (pre_id != min_id) {
+                arrangement[i] = min_id;
+                work_on_person[min_id]++;
+                pre_id = min_id;
+            } else {
+                CHOOSE_PERSON(REQUEST && NO_CONTINUE)
+                FOUND_PERSON
+                CHOOSE_PERSON(NO_CONTINUE)
+                FOUND_PERSON
             }
         }
     }
     int count = 0;
-    for (int i = 0; i < D * S; i++) {
-        std::cout << arrangement[i] + 1 << ",\n"[i % S == S - 1];
-        if (request[arrangement[i] * D * S + i]) {
+    for (int j = 0; j < D * S; j++) {
+        std::cout << arrangement[j] + 1 << ",\n"[j % S == S - 1];
+        if (request[arrangement[j] * D * S + j]) {
             count++;
         }
     }
@@ -330,9 +227,14 @@ int main() {
     std::cout.rdbuf(coutbackup);
     in.close();
     out.close();
-//#ifdef DEBUG
-//    int max_satisfy = D * S;
-//    std::cout << satisfy << std::endl << max_satisfy << std::endl << total << std::endl;
-//#endif
+#ifdef DEBUG
+#ifdef RANDOM
+    int max_satisfy = D * S;
+    std::cout << satisfy << std::endl << max_satisfy << std::endl << total << std::endl;
+#endif
+#ifdef GREEDY
+    std::cout << count << std::endl;
+#endif
+#endif
     return 0;
 }
