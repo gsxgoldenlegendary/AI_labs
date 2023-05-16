@@ -35,7 +35,7 @@ auto compare = [](const Node *a, const Node *b) {
 };
 
 std::multiset<Node *, decltype(compare)> edge_set(compare);
-
+//this function is used to get the entries of the L-shaped area
 std::tuple<std::pair<int, int>, std::pair<int, int>, std::pair<int, int>> set_L(int i, int j, Direction s) {
     switch (s) {
         case TOP_LEFT:
@@ -48,19 +48,19 @@ std::tuple<std::pair<int, int>, std::pair<int, int>, std::pair<int, int>> set_L(
             return std::make_tuple(std::make_pair(i + 1, j + 1), std::make_pair(i, j + 1), std::make_pair(i + 1, j));
     }
 }
-
+//It is main function, main part of the program
 int main() {
+    //redirect the input and output
     std::ifstream in;
     std::ofstream out;
     auto cinbackup = std::cin.rdbuf(in.rdbuf());
     auto coutbackup = std::cout.rdbuf(out.rdbuf());
-
     in.open(INPUT_FILE, std::ios::in);
     out.open(OUTPUT_FILE, std::ios::out);
     std::cin.rdbuf(in.rdbuf());
     std::cout.rdbuf(out.rdbuf());
     std::cin >> N;
-
+    //algorithm starts here
     auto base_node = new Node;
     auto result_node = new Node;
     for (int i = 0; i < N; i++)
@@ -77,11 +77,13 @@ int main() {
             for (int j = 0; j < N - 1; j++) {
                 for (int k = 1; k <= 4; k++) {
                     auto location = set_L(i, j, Direction(k));
+                    //if we are going to fill an L-shaped area with all 1's, then we can skip this step
                     if (top->matrix[std::get<0>(location).first][std::get<0>(location).second] ||
                         top->matrix[std::get<1>(location).first][std::get<1>(location).second] ||
                         top->matrix[std::get<2>(location).first][std::get<2>(location).second]) {
                         auto new_node = new Node;
                         memcpy(new_node->matrix, top->matrix, sizeof(top->matrix));
+                        //create a new node and reverse the L-shaped area
                         new_node->matrix[std::get<0>(location).first][std::get<0>(
                                 location).second] = !new_node->matrix[std::get<0>(location).first][std::get<0>(
                                 location).second];
@@ -97,12 +99,14 @@ int main() {
                         new_node->h = h_func(new_node);
                         new_node->f = new_node->g + new_node->h;
                         edge_set.insert(new_node);
+                        //if the new node is the result, then jump out
                         if (new_node->h == 0) {
                             result_node = new_node;
                             goto A;
                         }
                     }
                 }
+                //when the queue is too long, delete the last `SHRINK_LENGTH` nodes
                 if (edge_set.size() > MAX_LENGTH) {
                     for (int k = 0; k < SHRINK_LENGTH; k++) {
                         delete *--edge_set.end();
@@ -113,14 +117,17 @@ int main() {
         }
     }
     A:
+    //output the result
     std::cout << result_node->steps.size() << std::endl;
     for (auto x: result_node->steps)
         std::cout << std::get<0>(x) << " " << std::get<1>(x) << " " << std::get<2>(x) << std::endl;
+    //recover the input and output
     std::cin.rdbuf(cinbackup);
     std::cout.rdbuf(coutbackup);
     in.close();
     out.close();
 #ifdef DEBUG
+    //debug part, check the result
     cinbackup = std::cin.rdbuf(in.rdbuf());
     in.open(OUTPUT_FILE, std::ios::in);
     std::cin.rdbuf(in.rdbuf());
@@ -158,5 +165,6 @@ int main() {
     std::cin.rdbuf(cinbackup);
     in.close();
 #endif
+    //A good habit
     return 0;
 }
